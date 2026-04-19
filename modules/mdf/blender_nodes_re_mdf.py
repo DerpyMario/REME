@@ -7,6 +7,16 @@ from mathutils import Vector
 #Hair meshes use ambient occlusion with the second UV map
 legacyUV2HairOcclusionList = set(["RE2","RE2RT","RE3","RE3RT","RE7RT","DMC5"])
 
+def addNodeGroupSocket(nodeGroup, name, in_out, socket_type):
+	"""Add a socket to a node group, compatible with both old and new Blender APIs."""
+	if hasattr(nodeGroup, 'interface'):
+		nodeGroup.interface.new_socket(name=name, description="", in_out=in_out, socket_type=socket_type)
+	else:
+		if in_out == "INPUT":
+			nodeGroup.inputs.new(socket_type, name)
+		else:
+			nodeGroup.outputs.new(socket_type, name)
+
 def addLoc(node,delta):#Just to shorten what would otherwise be a long line
 	return (node.location[0] + delta[0],node.location[1] + delta[0])
 
@@ -16,22 +26,14 @@ def getColorNodeGroup(nodeTree):#No RGBA node in shader editor so a custom group
 	else:
 		nodeGroup = bpy.data.node_groups.new(type="ShaderNodeTree", name="ColorNodeGroup")
 	
-		if bpy.app.version < (4,0,0):
-			nodeGroup.inputs.new("NodeSocketColor","Color")
-			nodeGroup.inputs.new("NodeSocketFloat","Alpha")
-		else:
-			nodeGroup.interface.new_socket(name="Color",description="",in_out ="INPUT", socket_type="NodeSocketColor")
-			nodeGroup.interface.new_socket(name="Alpha",description="",in_out ="INPUT", socket_type="NodeSocketFloat")
+		addNodeGroupSocket(nodeGroup, "Color", "INPUT", "NodeSocketColor")
+		addNodeGroupSocket(nodeGroup, "Alpha", "INPUT", "NodeSocketFloat")
 		
 		inNode = nodeGroup.nodes.new('NodeGroupInput')
 		
 		outNode = nodeGroup.nodes.new('NodeGroupOutput')
-		if bpy.app.version < (4,0,0):
-			nodeGroup.outputs.new('NodeSocketColor', 'Color')
-			nodeGroup.outputs.new('NodeSocketFloat', 'Alpha')
-		else:
-			nodeGroup.interface.new_socket(name="Color",description="",in_out ="OUTPUT", socket_type="NodeSocketColor")
-			nodeGroup.interface.new_socket(name="Alpha",description="",in_out ="OUTPUT", socket_type="NodeSocketFloat")
+		addNodeGroupSocket(nodeGroup, "Color", "OUTPUT", "NodeSocketColor")
+		addNodeGroupSocket(nodeGroup, "Alpha", "OUTPUT", "NodeSocketFloat")
 		nodeGroup.links.new(inNode.outputs["Color"],outNode.inputs["Color"])
 		nodeGroup.links.new(inNode.outputs["Alpha"],outNode.inputs["Alpha"])
 	
@@ -46,26 +48,16 @@ def getImagePassThroughNodeGroup(nodeTree):#Same as color node group but with ve
 	else:
 		nodeGroup = bpy.data.node_groups.new(type="ShaderNodeTree", name="ImagePassThroughNodeGroup")
 	
-		if bpy.app.version < (4,0,0):
-			nodeGroup.inputs.new("NodeSocketColor","Color")
-			nodeGroup.inputs.new("NodeSocketFloat","Alpha")
-			nodeGroup.inputs.new("NodeSocketVector","Vector")
-		else:
-			nodeGroup.interface.new_socket(name="Color",description="",in_out ="INPUT", socket_type="NodeSocketColor")
-			nodeGroup.interface.new_socket(name="Alpha",description="",in_out ="INPUT", socket_type="NodeSocketFloat")
-			nodeGroup.interface.new_socket(name="Vector",description="",in_out ="INPUT", socket_type="NodeSocketVector")
+		addNodeGroupSocket(nodeGroup, "Color", "INPUT", "NodeSocketColor")
+		addNodeGroupSocket(nodeGroup, "Alpha", "INPUT", "NodeSocketFloat")
+		addNodeGroupSocket(nodeGroup, "Vector", "INPUT", "NodeSocketVector")
 		
 		inNode = nodeGroup.nodes.new('NodeGroupInput')
 		
 		outNode = nodeGroup.nodes.new('NodeGroupOutput')
-		if bpy.app.version < (4,0,0):
-			nodeGroup.outputs.new('NodeSocketColor', 'Color')
-			nodeGroup.outputs.new('NodeSocketFloat', 'Alpha')
-			nodeGroup.outputs.new('NodeSocketVector', 'Vector')
-		else:
-			nodeGroup.interface.new_socket(name="Color",description="",in_out ="OUTPUT", socket_type="NodeSocketColor")
-			nodeGroup.interface.new_socket(name="Alpha",description="",in_out ="OUTPUT", socket_type="NodeSocketFloat")
-			nodeGroup.interface.new_socket(name="Vector",description="",in_out ="OUTPUT", socket_type="NodeSocketVector")
+		addNodeGroupSocket(nodeGroup, "Color", "OUTPUT", "NodeSocketColor")
+		addNodeGroupSocket(nodeGroup, "Alpha", "OUTPUT", "NodeSocketFloat")
+		addNodeGroupSocket(nodeGroup, "Vector", "OUTPUT", "NodeSocketVector")
 		nodeGroup.links.new(inNode.outputs["Color"],outNode.inputs["Color"])
 		nodeGroup.links.new(inNode.outputs["Alpha"],outNode.inputs["Alpha"])
 		nodeGroup.links.new(inNode.outputs["Vector"],outNode.inputs["Vector"])
@@ -81,29 +73,17 @@ def getVec4NodeGroup(nodeTree):
 	else:
 		nodeGroup = bpy.data.node_groups.new(type="ShaderNodeTree", name="Vec4NodeGroup")
 	
-		if bpy.app.version < (4,0,0):
-			nodeGroup.inputs.new("NodeSocketFloat","X")
-			nodeGroup.inputs.new("NodeSocketFloat","Y")
-			nodeGroup.inputs.new("NodeSocketFloat","Z")
-			nodeGroup.inputs.new("NodeSocketFloat","W")
-		else:
-			nodeGroup.interface.new_socket(name="X",description="",in_out ="INPUT", socket_type="NodeSocketFloat")
-			nodeGroup.interface.new_socket(name="Y",description="",in_out ="INPUT", socket_type="NodeSocketFloat")
-			nodeGroup.interface.new_socket(name="Z",description="",in_out ="INPUT", socket_type="NodeSocketFloat")
-			nodeGroup.interface.new_socket(name="W",description="",in_out ="INPUT", socket_type="NodeSocketFloat")
+		addNodeGroupSocket(nodeGroup, "X", "INPUT", "NodeSocketFloat")
+		addNodeGroupSocket(nodeGroup, "Y", "INPUT", "NodeSocketFloat")
+		addNodeGroupSocket(nodeGroup, "Z", "INPUT", "NodeSocketFloat")
+		addNodeGroupSocket(nodeGroup, "W", "INPUT", "NodeSocketFloat")
 		inNode = nodeGroup.nodes.new('NodeGroupInput')
 		
 		outNode = nodeGroup.nodes.new('NodeGroupOutput')
-		if bpy.app.version < (4,0,0):
-			nodeGroup.outputs.new('NodeSocketFloat', "X")
-			nodeGroup.outputs.new('NodeSocketFloat', "Y")
-			nodeGroup.outputs.new('NodeSocketFloat', "Z")
-			nodeGroup.outputs.new('NodeSocketFloat', "W")
-		else:
-			nodeGroup.interface.new_socket(name="X",description="",in_out ="OUTPUT", socket_type="NodeSocketFloat")
-			nodeGroup.interface.new_socket(name="Y",description="",in_out ="OUTPUT", socket_type="NodeSocketFloat")
-			nodeGroup.interface.new_socket(name="Z",description="",in_out ="OUTPUT", socket_type="NodeSocketFloat")
-			nodeGroup.interface.new_socket(name="W",description="",in_out ="OUTPUT", socket_type="NodeSocketFloat")
+		addNodeGroupSocket(nodeGroup, "X", "OUTPUT", "NodeSocketFloat")
+		addNodeGroupSocket(nodeGroup, "Y", "OUTPUT", "NodeSocketFloat")
+		addNodeGroupSocket(nodeGroup, "Z", "OUTPUT", "NodeSocketFloat")
+		addNodeGroupSocket(nodeGroup, "W", "OUTPUT", "NodeSocketFloat")
 		
 		nodeGroup.links.new(inNode.outputs["X"],outNode.inputs["X"])
 		nodeGroup.links.new(inNode.outputs["Y"],outNode.inputs["Y"])
@@ -126,8 +106,8 @@ def getBentNormalNodeGroup(nodeTree):
 			nodeGroup.inputs.new("NodeSocketFloat","Color")
 			nodeGroup.inputs.new("NodeSocketFloat","Alpha")
 		else:
-			nodeGroup.interface.new_socket(name="Color",description="",in_out ="INPUT", socket_type="NodeSocketColor")
-			nodeGroup.interface.new_socket(name="Alpha",description="",in_out ="INPUT", socket_type="NodeSocketFloat")
+			addNodeGroupSocket(nodeGroup, "Color", "INPUT", "NodeSocketColor")
+			addNodeGroupSocket(nodeGroup, "Alpha", "INPUT", "NodeSocketFloat")
 		inNode = nodeGroup.nodes.new('NodeGroupInput')
 		currentLoc = [300,0]
 		separateRGBNode = nodes.new("ShaderNodeSeparateColor")
@@ -283,9 +263,9 @@ def getBentNormalNodeGroup(nodeTree):
 			nodeGroup.outputs.new('NodeSocketFloat', "BlueChannel")
 			
 		else:
-			nodeGroup.interface.new_socket(name="Color",description="",in_out ="OUTPUT", socket_type="NodeSocketColor")
-			nodeGroup.interface.new_socket(name="Roughness",description="",in_out ="OUTPUT", socket_type="NodeSocketFloat")
-			nodeGroup.interface.new_socket(name="BlueChannel",description="",in_out ="OUTPUT", socket_type="NodeSocketFloat")
+			addNodeGroupSocket(nodeGroup, "Color", "OUTPUT", "NodeSocketColor")
+			addNodeGroupSocket(nodeGroup, "Roughness", "OUTPUT", "NodeSocketFloat")
+			addNodeGroupSocket(nodeGroup, "BlueChannel", "OUTPUT", "NodeSocketFloat")
 		
 		links.new(mapRangeVectorNode.outputs["Vector"],outNode.inputs["Color"])
 		links.new(separateRGBNode.outputs["Red"],outNode.inputs["Roughness"])
@@ -312,13 +292,13 @@ def getDualUVMappingNodeGroup(nodeTree):
 			nodeGroup.inputs.new("NodeSocketFloat","Rotation")
 			nodeGroup.inputs.new("NodeSocketFloat","Tiling")
 		else:
-			nodeGroup.interface.new_socket(name="UV1",description="",in_out ="INPUT", socket_type="NodeSocketVector")
-			nodeGroup.interface.new_socket(name="UV2",description="",in_out ="INPUT", socket_type="NodeSocketVector")
-			nodeGroup.interface.new_socket(name="UseSecondaryUV",description="",in_out ="INPUT", socket_type="NodeSocketFloat")
-			nodeGroup.interface.new_socket(name="OffsetX",description="",in_out ="INPUT", socket_type="NodeSocketFloat")
-			nodeGroup.interface.new_socket(name="OffsetY",description="",in_out ="INPUT", socket_type="NodeSocketFloat")
-			nodeGroup.interface.new_socket(name="Rotation",description="",in_out ="INPUT", socket_type="NodeSocketFloat")
-			nodeGroup.interface.new_socket(name="Tiling",description="",in_out ="INPUT", socket_type="NodeSocketVector")
+			addNodeGroupSocket(nodeGroup, "UV1", "INPUT", "NodeSocketVector")
+			addNodeGroupSocket(nodeGroup, "UV2", "INPUT", "NodeSocketVector")
+			addNodeGroupSocket(nodeGroup, "UseSecondaryUV", "INPUT", "NodeSocketFloat")
+			addNodeGroupSocket(nodeGroup, "OffsetX", "INPUT", "NodeSocketFloat")
+			addNodeGroupSocket(nodeGroup, "OffsetY", "INPUT", "NodeSocketFloat")
+			addNodeGroupSocket(nodeGroup, "Rotation", "INPUT", "NodeSocketFloat")
+			addNodeGroupSocket(nodeGroup, "Tiling", "INPUT", "NodeSocketVector")
 		inNode = nodeGroup.nodes.new('NodeGroupInput')
 		#inNode.outputs["UseSecondaryUV"].default_value = 0.0
 		#inNode.outputs["Tiling"].default_value = 1.0
@@ -363,7 +343,7 @@ def getDualUVMappingNodeGroup(nodeTree):
 			nodeGroup.outputs.new('NodeSocketVector', "Vector")
 			
 		else:
-			nodeGroup.interface.new_socket(name="Vector",description="",in_out ="OUTPUT", socket_type="NodeSocketVector")
+			addNodeGroupSocket(nodeGroup, "Vector", "OUTPUT", "NodeSocketVector")
 		
 		links.new(mappingNode.outputs["Vector"],outNode.inputs["Vector"])
 	
@@ -392,8 +372,8 @@ def getMHWildsSkinMappingNodeGroup(nodeTree):
 			nodeGroup.inputs.new("NodeSocketFloat","Y")
 			
 		else:
-			nodeGroup.interface.new_socket(name="X",description="",in_out ="INPUT", socket_type="NodeSocketFloat")
-			nodeGroup.interface.new_socket(name="Y",description="",in_out ="INPUT", socket_type="NodeSocketFloat")
+			addNodeGroupSocket(nodeGroup, "X", "INPUT", "NodeSocketFloat")
+			addNodeGroupSocket(nodeGroup, "Y", "INPUT", "NodeSocketFloat")
 		
 		nodes = nodeGroup.nodes
 		links = nodeGroup.links
@@ -435,7 +415,7 @@ def getMHWildsSkinMappingNodeGroup(nodeTree):
 			nodeGroup.outputs.new('NodeSocketVector', "Vector")
 			
 		else:
-			nodeGroup.interface.new_socket(name="Vector",description="",in_out ="OUTPUT", socket_type="NodeSocketVector")
+			addNodeGroupSocket(nodeGroup, "Vector", "OUTPUT", "NodeSocketVector")
 		
 		links.new(mappingNode.outputs["Vector"],outNode.inputs["Vector"])
 	
@@ -511,47 +491,47 @@ def getMHWildsDetailMapNodeGroup(nodeTree):#Unfinished
 			nodeGroup.inputs.new("NodeSocketVector","TexCoordNormal")
 
 		else:
-			nodeGroup.interface.new_socket(name="DetailMaskMap",description="",in_out ="INPUT", socket_type="NodeSocketColor")
-			nodeGroup.interface.new_socket(name="DetailMaskMapAlpha",description="",in_out ="INPUT", socket_type="NodeSocketFloat")
+			addNodeGroupSocket(nodeGroup, "DetailMaskMap", "INPUT", "NodeSocketColor")
+			addNodeGroupSocket(nodeGroup, "DetailMaskMapAlpha", "INPUT", "NodeSocketFloat")
 			
-			nodeGroup.interface.new_socket(name="ColorLayer_R",description="",in_out ="INPUT", socket_type="NodeSocketColor")
-			nodeGroup.interface.new_socket(name="ColorParam_R",description="",in_out ="INPUT", socket_type="NodeSocketColor")
-			nodeGroup.interface.new_socket(name="NormalLayer_R",description="",in_out ="INPUT", socket_type="NodeSocketColor")
-			nodeGroup.interface.new_socket(name="NormalParam_R",description="",in_out ="INPUT", socket_type="NodeSocketFloat")
-			nodeGroup.interface.new_socket(name="RoughnessLayer_R",description="",in_out ="INPUT", socket_type="NodeSocketFloat")
-			nodeGroup.interface.new_socket(name="RoughnessParam_R",description="",in_out ="INPUT", socket_type="NodeSocketFloat")
-			nodeGroup.interface.new_socket(name="MetallicLayer_R",description="",in_out ="INPUT", socket_type="NodeSocketFloat")
-			nodeGroup.interface.new_socket(name="MetallicParam_R",description="",in_out ="INPUT", socket_type="NodeSocketFloat")
+			addNodeGroupSocket(nodeGroup, "ColorLayer_R", "INPUT", "NodeSocketColor")
+			addNodeGroupSocket(nodeGroup, "ColorParam_R", "INPUT", "NodeSocketColor")
+			addNodeGroupSocket(nodeGroup, "NormalLayer_R", "INPUT", "NodeSocketColor")
+			addNodeGroupSocket(nodeGroup, "NormalParam_R", "INPUT", "NodeSocketFloat")
+			addNodeGroupSocket(nodeGroup, "RoughnessLayer_R", "INPUT", "NodeSocketFloat")
+			addNodeGroupSocket(nodeGroup, "RoughnessParam_R", "INPUT", "NodeSocketFloat")
+			addNodeGroupSocket(nodeGroup, "MetallicLayer_R", "INPUT", "NodeSocketFloat")
+			addNodeGroupSocket(nodeGroup, "MetallicParam_R", "INPUT", "NodeSocketFloat")
 			
-			nodeGroup.interface.new_socket(name="ColorLayer_G",description="",in_out ="INPUT", socket_type="NodeSocketColor")
-			nodeGroup.interface.new_socket(name="ColorParam_G",description="",in_out ="INPUT", socket_type="NodeSocketColor")
-			nodeGroup.interface.new_socket(name="NormalLayer_G",description="",in_out ="INPUT", socket_type="NodeSocketColor")
-			nodeGroup.interface.new_socket(name="NormalParam_G",description="",in_out ="INPUT", socket_type="NodeSocketFloat")
-			nodeGroup.interface.new_socket(name="RoughnessLayer_G",description="",in_out ="INPUT", socket_type="NodeSocketFloat")
-			nodeGroup.interface.new_socket(name="RoughnessParam_G",description="",in_out ="INPUT", socket_type="NodeSocketFloat")
-			nodeGroup.interface.new_socket(name="MetallicLayer_G",description="",in_out ="INPUT", socket_type="NodeSocketFloat")
-			nodeGroup.interface.new_socket(name="MetallicParam_G",description="",in_out ="INPUT", socket_type="NodeSocketFloat")
+			addNodeGroupSocket(nodeGroup, "ColorLayer_G", "INPUT", "NodeSocketColor")
+			addNodeGroupSocket(nodeGroup, "ColorParam_G", "INPUT", "NodeSocketColor")
+			addNodeGroupSocket(nodeGroup, "NormalLayer_G", "INPUT", "NodeSocketColor")
+			addNodeGroupSocket(nodeGroup, "NormalParam_G", "INPUT", "NodeSocketFloat")
+			addNodeGroupSocket(nodeGroup, "RoughnessLayer_G", "INPUT", "NodeSocketFloat")
+			addNodeGroupSocket(nodeGroup, "RoughnessParam_G", "INPUT", "NodeSocketFloat")
+			addNodeGroupSocket(nodeGroup, "MetallicLayer_G", "INPUT", "NodeSocketFloat")
+			addNodeGroupSocket(nodeGroup, "MetallicParam_G", "INPUT", "NodeSocketFloat")
 			
-			nodeGroup.interface.new_socket(name="ColorLayer_B",description="",in_out ="INPUT", socket_type="NodeSocketColor")
-			nodeGroup.interface.new_socket(name="ColorParam_B",description="",in_out ="INPUT", socket_type="NodeSocketColor")
-			nodeGroup.interface.new_socket(name="NormalLayer_B",description="",in_out ="INPUT", socket_type="NodeSocketColor")
-			nodeGroup.interface.new_socket(name="NormalParam_B",description="",in_out ="INPUT", socket_type="NodeSocketFloat")
-			nodeGroup.interface.new_socket(name="RoughnessLayer_B",description="",in_out ="INPUT", socket_type="NodeSocketFloat")
-			nodeGroup.interface.new_socket(name="RoughnessParam_B",description="",in_out ="INPUT", socket_type="NodeSocketFloat")
-			nodeGroup.interface.new_socket(name="MetallicLayer_B",description="",in_out ="INPUT", socket_type="NodeSocketFloat")
-			nodeGroup.interface.new_socket(name="MetallicParam_B",description="",in_out ="INPUT", socket_type="NodeSocketFloat")
+			addNodeGroupSocket(nodeGroup, "ColorLayer_B", "INPUT", "NodeSocketColor")
+			addNodeGroupSocket(nodeGroup, "ColorParam_B", "INPUT", "NodeSocketColor")
+			addNodeGroupSocket(nodeGroup, "NormalLayer_B", "INPUT", "NodeSocketColor")
+			addNodeGroupSocket(nodeGroup, "NormalParam_B", "INPUT", "NodeSocketFloat")
+			addNodeGroupSocket(nodeGroup, "RoughnessLayer_B", "INPUT", "NodeSocketFloat")
+			addNodeGroupSocket(nodeGroup, "RoughnessParam_B", "INPUT", "NodeSocketFloat")
+			addNodeGroupSocket(nodeGroup, "MetallicLayer_B", "INPUT", "NodeSocketFloat")
+			addNodeGroupSocket(nodeGroup, "MetallicParam_B", "INPUT", "NodeSocketFloat")
 			
-			nodeGroup.interface.new_socket(name="ColorLayer_A",description="",in_out ="INPUT", socket_type="NodeSocketColor")
-			nodeGroup.interface.new_socket(name="ColorParam_A",description="",in_out ="INPUT", socket_type="NodeSocketColor")
-			nodeGroup.interface.new_socket(name="NormalLayer_A",description="",in_out ="INPUT", socket_type="NodeSocketColor")
-			nodeGroup.interface.new_socket(name="NormalParam_A",description="",in_out ="INPUT", socket_type="NodeSocketFloat")
-			nodeGroup.interface.new_socket(name="RoughnessLayer_A",description="",in_out ="INPUT", socket_type="NodeSocketFloat")
-			nodeGroup.interface.new_socket(name="RoughnessParam_A",description="",in_out ="INPUT", socket_type="NodeSocketFloat")
-			nodeGroup.interface.new_socket(name="MetallicLayer_A",description="",in_out ="INPUT", socket_type="NodeSocketFloat")
-			nodeGroup.interface.new_socket(name="MetallicParam_A",description="",in_out ="INPUT", socket_type="NodeSocketFloat")
+			addNodeGroupSocket(nodeGroup, "ColorLayer_A", "INPUT", "NodeSocketColor")
+			addNodeGroupSocket(nodeGroup, "ColorParam_A", "INPUT", "NodeSocketColor")
+			addNodeGroupSocket(nodeGroup, "NormalLayer_A", "INPUT", "NodeSocketColor")
+			addNodeGroupSocket(nodeGroup, "NormalParam_A", "INPUT", "NodeSocketFloat")
+			addNodeGroupSocket(nodeGroup, "RoughnessLayer_A", "INPUT", "NodeSocketFloat")
+			addNodeGroupSocket(nodeGroup, "RoughnessParam_A", "INPUT", "NodeSocketFloat")
+			addNodeGroupSocket(nodeGroup, "MetallicLayer_A", "INPUT", "NodeSocketFloat")
+			addNodeGroupSocket(nodeGroup, "MetallicParam_A", "INPUT", "NodeSocketFloat")
 			
-			nodeGroup.interface.new_socket(name="UseDetail",description="",in_out ="INPUT", socket_type="NodeSocketFloat")
-			nodeGroup.interface.new_socket(name="TexCoordNormal",description="",in_out ="INPUT", socket_type="NodeSocketVector")
+			addNodeGroupSocket(nodeGroup, "UseDetail", "INPUT", "NodeSocketFloat")
+			addNodeGroupSocket(nodeGroup, "TexCoordNormal", "INPUT", "NodeSocketVector")
 			
 		inNode = nodeGroup.nodes.new('NodeGroupInput')
 	
@@ -567,10 +547,10 @@ def getMHWildsDetailMapNodeGroup(nodeTree):#Unfinished
 			nodeGroup.outputs.new('NodeSocketFloat', "Metallic")
 			
 		else:
-			nodeGroup.interface.new_socket(name="Color",description="",in_out ="OUTPUT", socket_type="NodeSocketColor")
-			nodeGroup.interface.new_socket(name="Normal",description="",in_out ="OUTPUT", socket_type="NodeSocketVector")
-			nodeGroup.interface.new_socket(name="Roughness",description="",in_out ="OUTPUT", socket_type="NodeSocketFloat")
-			nodeGroup.interface.new_socket(name="Metallic",description="",in_out ="OUTPUT", socket_type="NodeSocketFloat")
+			addNodeGroupSocket(nodeGroup, "Color", "OUTPUT", "NodeSocketColor")
+			addNodeGroupSocket(nodeGroup, "Normal", "OUTPUT", "NodeSocketVector")
+			addNodeGroupSocket(nodeGroup, "Roughness", "OUTPUT", "NodeSocketFloat")
+			addNodeGroupSocket(nodeGroup, "Metallic", "OUTPUT", "NodeSocketFloat")
 		
 		#links.new(mappingNode.outputs["Vector"],outNode.inputs["Vector"])
 	

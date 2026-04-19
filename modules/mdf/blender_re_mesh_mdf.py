@@ -388,7 +388,7 @@ texVersionDict = {
 	45:".241106027",
 	51:".250813143",
   }	
-def getTexPath(baseTexturePath,chunkPathList,mdfVersion):
+def getTexPath(baseTexturePath,chunkPathList,mdfVersion,meshDir=None):
 	
 	
 	inputPath = None
@@ -415,18 +415,35 @@ def getTexPath(baseTexturePath,chunkPathList,mdfVersion):
 				inputPath = resolveLinuxPath(os.path.join(chunkPath,baseTexturePath+f".tex{texVersion}"))
 			if inputPath != None:
 				break
-				
+	
+	# Fallback: search for matching .tex file by filename in the mesh directory
+	if inputPath is None and meshDir and os.path.isdir(meshDir):
+		texFileName = os.path.basename(baseTexturePath)
+		# Try version-specific first
+		if texVersion:
+			inputPath = wildCardFileSearch(glob.escape(os.path.join(meshDir, texFileName + f".tex{texVersion}")) + "*")
+		# Fallback: any .tex version
+		if inputPath is None:
+			inputPath = wildCardFileSearch(glob.escape(os.path.join(meshDir, texFileName + ".tex")) + "*")
+		if inputPath is None and isLinux():
+			if texVersion:
+				inputPath = resolveLinuxPath(os.path.join(meshDir, texFileName + f".tex{texVersion}"))
+			if inputPath is None:
+				inputPath = resolveLinuxPath(os.path.join(meshDir, texFileName + ".tex"))
+	
 	return inputPath	
 	
 
 
 
-def importMDF(mdfFile,meshMaterialDict,loadUnusedTextures,loadUnusedProps,useBackfaceCulling,reloadCachedTextures,chunkPath = "",gameName = None,arrangeNodes = False):
+def importMDF(mdfFile,meshMaterialDict,loadUnusedTextures,loadUnusedProps,useBackfaceCulling,reloadCachedTextures,chunkPath = "",gameName = None,arrangeNodes = False,meshFilePath = None):
 	TEXTURE_CACHE_DIR = bpy.context.preferences.addons[ADDON_NAME].preferences.textureCachePath
 	USE_DDS = bpy.context.preferences.addons[ADDON_NAME].preferences.useDDS == True and bpy.app.version >= (4,2,0)
 	
 	inErrorState = False
 	
+	# Derive mesh directory for local .tex file fallback search
+	meshDir = os.path.dirname(meshFilePath) if meshFilePath else None
 	
 	loadedImageDict = dict()
 	errorFileSet = set()
@@ -481,7 +498,7 @@ def importMDF(mdfFile,meshMaterialDict,loadUnusedTextures,loadUnusedProps,useBac
 					baseTexturePath = texture.replace("@","").replace(".tex","").replace('/',os.sep)
 					outputPath = os.path.join(TEXTURE_CACHE_DIR,baseTexturePath+".png")
 					
-					texPath = getTexPath(baseTexturePath,chunkPathList,mdfVersion)
+					texPath = getTexPath(baseTexturePath,chunkPathList,mdfVersion,meshDir)
 					
 					if texPath != None:
 						if texPath not in loadedImageDict:
