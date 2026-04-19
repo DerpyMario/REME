@@ -336,6 +336,7 @@ def importMesh(meshName = "newMesh",vertexList = [],faceList = [],vertexNormalLi
 		if len(boneNameList) > 1:
 			#print(boneNameList)
 			usedBoneIndices = sorted(list({x for vertex in vertexGroupBoneIndicesList for x in vertex} | {x for vertex in extraVertexGroupBoneIndicesList for x in vertex}))#Get all used bone indices in hierarchy order
+			usedBoneIndices = [i for i in usedBoneIndices if i < len(boneNameList)]#Filter out invalid bone indices
 			#print(usedBoneIndices)
 			for boneIndex in usedBoneIndices:
 				#print(boneIndex)
@@ -349,6 +350,8 @@ def importMesh(meshName = "newMesh",vertexList = [],faceList = [],vertexNormalLi
 				#print(vertexIndex)
 				#print(boneIndexList)
 				for weightIndex, boneIndex in enumerate(boneIndexList):
+					if boneIndex >= len(boneNameList):
+						continue
 					if vertexGroupWeightList[vertexIndex][weightIndex] > 0:
 						boneName = boneNameList[boneIndex]
 						if len(boneName) > 63:
@@ -361,6 +364,8 @@ def importMesh(meshName = "newMesh",vertexList = [],faceList = [],vertexNormalLi
 					#print(vertexIndex)
 					#print(boneIndexList)
 					for weightIndex, boneIndex in enumerate(boneIndexList):
+						if boneIndex >= len(boneNameList):
+							continue
 						if extraVertexGroupWeightList[vertexIndex][weightIndex] > 0:
 							boneName = boneNameList[boneIndex]
 							if len(boneName) > 63:
@@ -378,6 +383,7 @@ def importMesh(meshName = "newMesh",vertexList = [],faceList = [],vertexNormalLi
 		#print("Importing secondary weights")
 		#Only create vertex groups for bones that get used
 		usedBoneIndices = sorted(list({x for vertex in vertexGroupBoneIndicesListSecondary for x in vertex}))#Get all used bone indices in hierarchy order
+		usedBoneIndices = [i for i in usedBoneIndices if i < len(boneNameList)]#Filter out invalid bone indices
 		#print(boneNameList)
 		if len(boneNameList) > 1:
 			#print(boneNameList)
@@ -394,6 +400,8 @@ def importMesh(meshName = "newMesh",vertexList = [],faceList = [],vertexNormalLi
 				#print(vertexIndex)
 				#print(boneIndexList)
 				for weightIndex, boneIndex in enumerate(boneIndexList):
+					if boneIndex >= len(boneNameList):
+						continue
 					if vertexGroupWeightList[vertexIndex][weightIndex] > 0:
 						boneName = "SHAPEKEY_"+boneNameList[boneIndex]
 						if len(boneName) > 63:
