@@ -775,7 +775,7 @@ def importREMeshFile(filePath,options):
 					if options["loadMDFData"]:
 						print("Loading Mesh Materials From MDF...")
 					mdfFile = readMDF(mdfPath)
-					importMDF(mdfFile,materialDict,options["loadUnusedTextures"],options["loadUnusedProps"],options["useBackfaceCulling"],options["reloadCachedTextures"],chunkPath = chunkPath,gameName = gameName,arrangeNodes = True)
+					importMDF(mdfFile,materialDict,options["loadUnusedTextures"],options["loadUnusedProps"],options["useBackfaceCulling"],options["reloadCachedTextures"],chunkPath = chunkPath,gameName = gameName,arrangeNodes = True,meshFilePath = filePath)
 					
 					mdfImportEndTime = time.time()
 					mdfImportTime =  mdfImportEndTime - mdfImportStartTime
