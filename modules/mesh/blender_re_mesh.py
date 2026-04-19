@@ -419,6 +419,7 @@ def importMesh(meshName = "newMesh",vertexList = [],faceList = [],vertexNormalLi
 	
 	if armature != None:
 		meshObj.parent = armature
+		#Required for Blender 4.0+ to ensure mesh stays correctly positioned when parented to armature
 		meshObj.matrix_parent_inverse = armature.matrix_world.inverted()
 		mod = meshObj.modifiers.new(name = 'Armature', type = 'ARMATURE')
 		mod.object = armature
