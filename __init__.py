@@ -679,7 +679,7 @@ class ImportREMesh(Operator, ImportHelper):
             options={'SKIP_SAVE'}
             )
     filename_ext = ".mesh.*"
-    filter_glob: StringProperty(default="*.mesh.*", options={'HIDDEN'})
+    filter_glob: StringProperty(default="*.mesh.*;*.mesh", options={'HIDDEN'})
     clearScene : BoolProperty(
        name = "Clear Scene",
        description = "Clears all objects before importing the mesh file",
@@ -1143,7 +1143,7 @@ class ImportREMDF(bpy.types.Operator, ImportHelper):
             options={'SKIP_SAVE'}
             )
     filename_ext = ".mdf.*"
-    filter_glob: StringProperty(default="*.mdf2.*", options={'HIDDEN'})
+    filter_glob: StringProperty(default="*.mdf2.*;*.mdf2", options={'HIDDEN'})
 
     def execute(self, context):
         editorVersion = str(bl_info["version"][0])+"."+str(bl_info["version"][1])
@@ -1287,7 +1287,7 @@ class ImportREFBXSkel(bpy.types.Operator, ImportHelper):
             options={'SKIP_SAVE'}
             )
     filename_ext = ".fbxskel.*"
-    filter_glob: StringProperty(default="*.fbxskel.*", options={'HIDDEN'})
+    filter_glob: StringProperty(default="*.fbxskel.*;*.fbxskel", options={'HIDDEN'})
     
     def invoke(self, context, event):
         if self.directory:
@@ -1411,7 +1411,7 @@ class ImportRESFur(bpy.types.Operator, ImportHelper):
             options={'SKIP_SAVE'}
             )
     filename_ext = ".sfur.*"
-    filter_glob: StringProperty(default="*.sfur.*", options={'HIDDEN'})
+    filter_glob: StringProperty(default="*.sfur.*;*.sfur", options={'HIDDEN'})
 
     def execute(self, context):
         editorVersion = str(bl_info["version"][0])+"."+str(bl_info["version"][1])
