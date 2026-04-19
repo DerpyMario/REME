@@ -323,9 +323,14 @@ def importMesh(meshName = "newMesh",vertexList = [],faceList = [],vertexNormalLi
 	
 	#Import vertex color layer 0
 	if vertexColor0List != []:
-		vcol_layer = meshData.vertex_colors.new()
-		for l,color in zip(meshData.loops, vcol_layer.data):
-			color.color = vertexColor0List[l.vertex_index]
+		if bpy.app.version < (4,0,0):
+			vcol_layer = meshData.vertex_colors.new()
+			for l,color in zip(meshData.loops, vcol_layer.data):
+				color.color = vertexColor0List[l.vertex_index]
+		else:
+			vcol_layer = meshData.color_attributes.new(name='Col', type='BYTE_COLOR', domain='CORNER')
+			for l in meshData.loops:
+				vcol_layer.data[l.index].color = vertexColor0List[l.vertex_index]
 		#print(f"DEBUG:\t Loaded Vertex Color")
 	
 	meshObj = bpy.data.objects.new(meshName, meshData)
@@ -414,9 +419,10 @@ def importMesh(meshName = "newMesh",vertexList = [],faceList = [],vertexNormalLi
 	
 	if armature != None:
 		meshObj.parent = armature
+		#Required for Blender 4.0+ to ensure mesh stays correctly positioned when parented to armature
+		meshObj.matrix_parent_inverse = armature.matrix_world.inverted()
 		mod = meshObj.modifiers.new(name = 'Armature', type = 'ARMATURE')
 		mod.object = armature
-		#meshObj.matrix_parent_inverse = armature.matrix_world.inverted()
 	if rotate90:
 		meshObj.data.transform(rotate90Matrix)
 			
@@ -1518,7 +1524,11 @@ def exportREMeshFile(filePath,options):
 				else:	
 					parsedSubMesh.uv2List = None
 					meshHasUV2 = False
-				if len(evaluatedSubMeshData.vertex_colors) > 0:
+				if bpy.app.version < (4,0,0):
+					hasColorData = len(evaluatedSubMeshData.vertex_colors) > 0
+				else:
+					hasColorData = len(evaluatedSubMeshData.color_attributes) > 0
+				if hasColorData:
 					parsedSubMesh.colorList = np.zeros((len(evaluatedSubMeshData.vertices),4))
 					meshHasColor = True
 					parsedMesh.bufferHasColor = True
@@ -1588,7 +1598,10 @@ def exportREMeshFile(filePath,options):
 					
 					#Vertex Color	
 					if meshHasColor:
-						parsedSubMesh.colorList[currentVertIndex] = evaluatedSubMeshData.vertex_colors[0].data[loop.index].color
+						if bpy.app.version < (4,0,0):
+							parsedSubMesh.colorList[currentVertIndex] = evaluatedSubMeshData.vertex_colors[0].data[loop.index].color
+						else:
+							parsedSubMesh.colorList[currentVertIndex] = evaluatedSubMeshData.color_attributes[0].data[loop.index].color
 						
 				
 					#Bone Weights
