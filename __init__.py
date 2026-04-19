@@ -663,8 +663,8 @@ class REMeshPreferences(AddonPreferences):
 
         # Reorder buttons
         row = layout.row(align=True)
-        row.operator("re_mesh.chunk_path_list_reorder_item", text="Move Up").direction = 'UP'
-        row.operator("re_mesh.chunk_path_list_reorder_item", text="Move Down").direction = 'DOWN'
+        row.operator("re_mesh_cm.chunk_path_list_reorder_item", text="Move Up").direction = 'UP'
+        row.operator("re_mesh_cm.chunk_path_list_reorder_item", text="Move Down").direction = 'DOWN'
 class ImportREMesh(Operator, ImportHelper):
     '''Import RE Engine Mesh File'''
     bl_idname = "re_mesh_cm.importfile"
